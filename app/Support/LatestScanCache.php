@@ -22,7 +22,11 @@ final readonly class LatestScanCache
      * Stores the scan with its customers as a plain array. Objects are not
      * allowed: the cache unserializes them as __PHP_Incomplete_Class.
      *
-     * @return array<string, mixed>
+     * A newer scan that is already cached is kept, so two scans finishing out
+     * of order can't leave the older one as "latest". (Read-then-write, not
+     * atomic, but the window is tiny compared with a scan's duration.)
+     *
+     * @return array<string, mixed> the payload of the given scan
      */
     public function put(Scan $scan): array
     {
@@ -32,7 +36,11 @@ final readonly class LatestScanCache
         $response = ScanResource::make($scan)->response()->getData(true);
         $payload = $response['data'];
 
-        $this->cache->forever(self::KEY, $payload);
+        $cached = $this->cache->get(self::KEY);
+
+        if (!is_array($cached) || !is_int($cached['id'] ?? null) || $cached['id'] <= $scan->id) {
+            $this->cache->forever(self::KEY, $payload);
+        }
 
         return $payload;
     }

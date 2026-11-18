@@ -18,7 +18,12 @@ async function loadLatest(): Promise<void> {
     loadError.value = null;
 
     try {
-        scan.value = await api.getLatestScan();
+        const latest = await api.getLatestScan();
+
+        // A scan run while this request was pending is newer; keep it.
+        if (scan.value === null || latest.id >= scan.value.id) {
+            scan.value = latest;
+        }
     } catch (error) {
         if (!(error instanceof ApiError && error.status === 404)) {
             loadError.value = errorMessage(error);
