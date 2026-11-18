@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\DB;
  * Fetches every customer, checks them for fraud and records the result as a
  * new Scan. Nothing is saved when the customers API fails.
  */
-final readonly class RunFraudScan
+final readonly class RunFraudScanAction
 {
     public function __construct(
         private CustomersApiClient $client,

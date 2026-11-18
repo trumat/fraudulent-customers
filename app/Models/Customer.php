@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Support\CustomerName;
+use Carbon\CarbonImmutable;
 use Database\Factories\CustomerFactory;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -12,7 +13,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * A customer as recorded by one scan, with the fraud verdict at that time.
  *
+ * @property ?CarbonImmutable $date_of_birth
  * @property list<string> $products
+ * @property ?CarbonImmutable $last_invoice_date
+ * @property ?CarbonImmutable $last_login_at
  * @property list<string> $fraud_reasons
  */
 class Customer extends Model

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Actions\RunFraudScan;
+use App\Actions\RunFraudScanAction;
 use App\Models\Customer;
 use App\Models\Scan;
 use App\Services\CustomersApi\CustomersApiException;
@@ -11,7 +11,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 
-class RunFraudScanTest extends TestCase
+class RunFraudScanActionTest extends TestCase
 {
     use RefreshDatabase;
 
@@ -46,7 +46,7 @@ class RunFraudScanTest extends TestCase
             $this->row(['customerId' => 5]),
         ]])]);
 
-        $scan = app(RunFraudScan::class)->handle();
+        $scan = app(RunFraudScanAction::class)->handle();
 
         $this->assertDatabaseCount('scans', 1);
         $this->assertDatabaseCount('customers', 5);
@@ -74,7 +74,7 @@ class RunFraudScanTest extends TestCase
         $row = $this->row();
         Http::fake(['*' => Http::response(['success' => true, 'customers' => [$row]])]);
 
-        $scan = app(RunFraudScan::class)->handle();
+        $scan = app(RunFraudScanAction::class)->handle();
 
         $this->assertCount(1, $scan->customers);
         $customer = Customer::query()->sole();
@@ -102,7 +102,7 @@ class RunFraudScanTest extends TestCase
     {
         Http::fake(['*' => Http::response(['success' => true, 'customers' => [['customerId' => 7]]])]);
 
-        app(RunFraudScan::class)->handle();
+        app(RunFraudScanAction::class)->handle();
 
         $customer = Customer::query()->sole();
         $this->assertNull($customer->first_name);
@@ -118,7 +118,7 @@ class RunFraudScanTest extends TestCase
         Http::fake(['*' => Http::response('Service Unavailable', 503)]);
 
         try {
-            app(RunFraudScan::class)->handle();
+            app(RunFraudScanAction::class)->handle();
             $this->fail('Expected a CustomersApiException.');
         } catch (CustomersApiException) {
             // expected
